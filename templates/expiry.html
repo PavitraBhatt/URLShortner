@@ -1,0 +1,31 @@
+<!-- {% extends 'base.html' %}
+{% block content %}
+<form id="expiry-form">
+    {% csrf_token %}
+    <input type="text" id="link" name="link" placeholder="Enter URL">
+    <input type="datetime-local" id="expiry_date" name="expiry_date">
+    <button type="submit">Shorten</button>
+</form>
+<section id="expiry-output"></section>
+<script>
+    $('#expiry-form').on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '{% url "expiry-create" %}',
+            data: {
+                link: $('#link').val(),
+                expiry_date: $('#expiry_date').val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            
+            success: function (data) {
+                $('#expiry-output').html(
+                    `<p>Shortened URL: <a href="/${data.uuid}" target="_blank">/${data.uuid}</a></p>`
+                );
+            }
+        });
+    })
+    console.log("data",data);
+</script>
+{% endblock %} -->

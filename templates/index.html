@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener</title>
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: "Lato", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom, #330867, #30cfd0);
+      color: #fff;
+    }
+
+    main {
+      width: 100%;
+      max-width: 600px;
+      background-color: #fff;
+      color: #111;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin: 0;
+      padding: 1.5rem;
+      background-color: #330867;
+      color: #fff;
+      text-align: center;
+      font-size: 1.75rem;
+    }
+
+    form {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    input {
+      padding: 1rem;
+      font-size: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #330867;
+      outline: none;
+    }
+
+    .buttons button {
+      font-size: 1rem;
+      padding: 1rem;
+      background-color: #330867;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .buttons button:hover {
+      background-color: #30cfd0;
+    }
+
+    section {
+      padding: 1rem 2rem;
+      text-align: center;
+      background-color: #f9f9f9;
+      border-top: 2px solid #ccc;
+      color: #333;
+    }
+
+    section h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input,
+      button {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>URL Shortener</h1>
+    <form id="post-form">
+      {% csrf_token %}
+      <input type="text" name="link" id="link" placeholder="Enter URL here" required>
+  
+      <!-- Expiry Date Option -->
+      <label>
+          <input type="checkbox" id="expiry_checkbox" name="enable_expiry">
+          Set Expiry Date
+      </label>
+      <input type="datetime-local" name="expiry_date" id="expiry_date" disabled>
+  
+      <!-- Password Protection Option -->
+      <label>
+          <input type="checkbox" id="password_checkbox" name="enable_password">
+          Enable Password Protection
+      </label>
+      <input type="password" name="password" id="password" placeholder="Enter Password" disabled>
+  
+      <!-- QR Code Generation Option -->
+      <label>
+          <input type="checkbox" name="enable_qr" id="enable_qr">
+          Generate QR Code
+      </label>
+  
+      <button type="submit" id="shorten">Shorten</button>
+  </form>
+  
+  <section id="section">
+      <h2></h2>
+      <img id="qr-code" src="" alt="QR Code" style="display:none;">
+      <div id="social-links" style="display:none;">
+          <h3>Share:</h3>
+          <a id="twitter-share" href="#" target="_blank">Twitter</a> |
+          <a id="facebook-share" href="#" target="_blank">Facebook</a> |
+          <a id="whatsapp-share" href="#" target="_blank">WhatsApp</a>
+      </div>
+  </section>
+  
+  <script>
+      // Enable/Disable Expiry Date Field
+      document.getElementById('expiry_checkbox').addEventListener('change', function () {
+          document.getElementById('expiry_date').disabled = !this.checked;
+      });
+  
+      // Enable/Disable Password Field
+      document.getElementById('password_checkbox').addEventListener('change', function () {
+          document.getElementById('password').disabled = !this.checked;
+      });
+  
+      // AJAX Request
+      $(document).on('submit', '#post-form', function (e) {
+          e.preventDefault();
+  
+          $.ajax({
+              type: 'POST',
+              url: '/create',
+              data: {
+                  link: $('#link').val(),
+                  enable_expiry: $('#expiry_checkbox').is(':checked'),
+                  expiry_date: $('#expiry_date').val(),
+                  enable_password: $('#password_checkbox').is(':checked'),
+                  password: $('#password').val(),
+                  enable_qr: $('#enable_qr').is(':checked'),
+                  csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+              },
+              success: function (data) {
+                  // Display Shortened URL
+                  $('h2').html(`Shortened URL: <a href="http://127.0.0.1:8000/${data.uuid}" target="_blank">http://127.0.0.1:8000/${data.uuid}</a>`);
+  
+                  // Display QR Code (if enabled)
+                  if (data.qr_code) {
+                      $('#qr-code').attr('src', `/media/${data.qr_code}`).show();
+                  }
+  
+                  // Update Social Media Links (if sharing is enabled)
+                  $('#twitter-share').attr('href', `https://twitter.com/share?url=http://127.0.0.1:8000/${data.uuid}`);
+                  $('#facebook-share').attr('href', `https://www.facebook.com/sharer/sharer.php?u=http://127.0.0.1:8000/${data.uuid}`);
+                  $('#whatsapp-share').attr('href', `https://api.whatsapp.com/send?text=http://127.0.0.1:8000/${data.uuid}`);
+                  $('#social-links').show();
+              },
+          });
+      });
+  </script>
+  
+</body>
+</html>
