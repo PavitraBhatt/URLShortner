@@ -23,9 +23,9 @@ def create(request):
         return HttpResponseRedirect('/')
 
 def index(request):
-    # Handle GET request
+    print('request', request.method)
     if request.method == 'GET':
-        return render(request, 'index.html')  # Render your HTML template
+        return render(request, 'index.html')
     elif request.method == 'POST':
         link = request.POST.get('link')
         print('link', link)

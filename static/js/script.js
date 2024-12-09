@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Generic URL Shortener
     const genericForm = document.getElementById("generic-form");
     if (genericForm) {
-        console.log("data :",document);
+        // console.log("data :",document);
         genericForm.addEventListener("submit", (e) => {
             e.preventDefault();
             const link = document.getElementById("link").value;

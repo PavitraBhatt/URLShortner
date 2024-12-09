@@ -20,7 +20,7 @@
       padding: 0;
       min-height: 100vh;
       font-family: "Lato", sans-serif;
-      display: flex;
+      display: flex;  
       justify-content: center;
       align-items: center;
       background: linear-gradient(to bottom, #330867, #30cfd0);
@@ -153,7 +153,7 @@
       document.getElementById('expiry_checkbox').addEventListener('change', function () {
           document.getElementById('expiry_date').disabled = !this.checked;
       });
-  
+      console.log("document",document.getElementById('expiry_checkbox').checked);
       // Enable/Disable Password Field
       document.getElementById('password_checkbox').addEventListener('change', function () {
           document.getElementById('password').disabled = !this.checked;
@@ -175,9 +175,11 @@
                   enable_qr: $('#enable_qr').is(':checked'),
                   csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
               },
+
               success: function (data) {
+                console.log("data",data);
                   // Display Shortened URL
-                  $('h2').html(`Shortened URL: <a href="http://127.0.0.1:8000/${data.uuid}" target="_blank">http://127.0.0.1:8000/${data.uuid}</a>`);
+                  $('h2').html(`Shortened URL: <a href="http://127.0.0.1:8000/${data}" target="_blank">http://127.0.0.1:8000/${data}</a>`);
   
                   // Display QR Code (if enabled)
                   if (data.qr_code) {
@@ -191,6 +193,7 @@
                   $('#social-links').show();
               },
           });
+          // console.log('data :',data);
       });
   </script>
   
